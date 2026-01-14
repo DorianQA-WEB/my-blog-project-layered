@@ -28,3 +28,6 @@ async def create_category(
 ):
     """Создать новую категорию."""
     db_category = await category_service.create_category(category=category)
+    if db_category is None:
+        raise HTTPException(status_code=400, detail="Category with this name already exists")
+    return db_category
