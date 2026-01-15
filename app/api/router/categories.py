@@ -31,3 +31,14 @@ async def create_category(
     if db_category is None:
         raise HTTPException(status_code=400, detail="Category with this name already exists")
     return db_category
+
+@router.get("/{category_id}", response_model=Category)
+async def read_category(
+        category_id: int,
+        category_service: CategoryService = Depends(get_category_service)
+):
+    """Получить категорию по ID."""
+    db_category = await category_service.get_category_by_id(category_id=category_id)
+    if db_category is None:
+        raise HTTPException(status_code=404, detail="Category not found")
+    return db_category

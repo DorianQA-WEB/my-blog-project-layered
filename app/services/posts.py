@@ -1,4 +1,4 @@
-from collections import Sequence
+from collections.abc import Sequence
 from app.repositories.posts import PostRepository
 from app.schemas.post import PostBase
 from app.models.post import Post
