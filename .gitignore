@@ -1,0 +1,12 @@
+.env
+
+#pycharm
+.idea
+
+#python
+.venv
+__pycache__
+
+alembic.ini
+
+config.py
