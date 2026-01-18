@@ -17,7 +17,7 @@ class CategoryRepository:
 
     async def get_all(self, skip: int = 0, limit: int = 100) -> list[Category]:
         result = self.db.scalars(select(Category).offset(skip).limit(limit))
-        return result.all()
+        return result.scalars().all()
 
     async def create(self, name: str):
         db_category = Category(name=name)
