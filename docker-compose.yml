@@ -5,8 +5,12 @@ services:
       - "127.0.0.1:8001:8000" # Порт, по которому будет доступен Posts Service
     environment:
       DATABASE_URL: sqlite+aiosqlite:///./data/posts.db # Отдельная БД для постов
+      CATEGORIES_SERVICE_URL: http://categories_service:8000 # Posts Service должен знать, как обращаться к Categories Service
     volumes:
       - posts_db_data:/app/data
+    depends_on:
+      categories_service:
+        condition: service_started # Posts Service зависит от Categories Service для валидации
 
 
   categories_service:

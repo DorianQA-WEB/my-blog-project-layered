@@ -4,3 +4,4 @@ SQLAlchemy==2.0.45
 aiosqlite==0.22.1
 greenlet==3.3.0
 pydantic==2.12.
+httpx==0.28.1
