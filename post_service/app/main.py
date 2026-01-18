@@ -1,18 +1,23 @@
+import asyncio
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
 from app.api.router import posts
 from app.core.database import create_db_and_tables
+from app.core.rabbitmq import category_validator_instance
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    print("Приложение запускается. Создаем базу данных...")
+    print("Приложение постов запускается. Создаем базу данных и подключаемся к RabbitMQ...")
     await create_db_and_tables()
-    print("База данных инициализирована.")
+    await category_validator_instance.connect() # Подключаемся к RabbitMQ
+    print("Инициализация завершена.")
     yield
-    print("Приложение завершает работу.")
+    print("Приложение постов завершает работу. Закрываем соединение с RabbitMQ...")
+    await category_validator_instance.close() # Закрываем соединение с RabbitMQ
+    print("Работа завершена.")
 
 app = FastAPI(
     title="Сервис для постов",

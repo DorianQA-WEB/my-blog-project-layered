@@ -1,16 +1,31 @@
 services:
+  rabbitmq:
+    image: rabbitmq:4.1.1-management-alpine
+    ports:
+      - "127.0.0.1:5672:5672" # Порт для веб-интерфейса RabbitMQ Management
+    environment:
+      RABBITMQ_DEFAULT_USER: quest
+      RABBITMQ_DEFAULT_PASS: quest
+    healthcheck: # Проверка готовности RabbitMQ
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   post_service:
     build: ./post_service
     ports:
       - "127.0.0.1:8001:8000" # Порт, по которому будет доступен Posts Service
     environment:
       DATABASE_URL: sqlite+aiosqlite:///./data/posts.db # Отдельная БД для постов
-      CATEGORIES_SERVICE_URL: http://categories_service:8000 # Posts Service должен знать, как обращаться к Categories Service
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/ # URL для подключения к RabbitMQ
     volumes:
       - posts_db_data:/app/data
     depends_on:
       categories_service:
         condition: service_started # Posts Service зависит от Categories Service для валидации
+      rabbitmq:
+        condition: service_healthy # Posts Service зависит от проверки готовности RABBITMQ
 
 
   categories_service:
@@ -19,8 +34,12 @@ services:
       - "127.0.0.1:8002:8000" # Порт, по которому будет доступен Categories Service
     environment:
       DATABASE_URL: sqlite+aiosqlite:///./data/categories.db # Отдельная БД для категорий
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
     volumes:
       - categories_db_data:/app/data
+    depends_on:
+      rabbitmq:
+        condition: service_healthy # Categories Service зависит от проверки готовности RABBITMQ
 
 volumes:
   posts_db_data:
