@@ -23,7 +23,7 @@ async def lifespan(app: FastAPI):
         print("Consumer RabbitMQ успешно остановлен.")
 
 app = FastAPI(
-    title="Сервис для категорий",
+    title="Сервис для категорий (связь через RabbitMQ)",
     lifespan=lifespan
 )
 
