@@ -1,5 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-
+from fastapi import APIRouter, Depends, HTTPException, status, Request
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 from app.core.dependencies import get_category_service
 from app.schemas.category import Category, CategoryBase
 from app.services.categories import CategoryService
@@ -10,7 +12,9 @@ router = APIRouter(
     tags=["categories"]
 )
 
+
 @router.get("/", response_model=list[Category])
+@Limiter.limit("5/minute")
 async def read_categories(
         skip: int = 0,
         limit: int = 100,
@@ -34,6 +38,7 @@ async def create_category(
 
 
 @router.get("/{category_id}", response_model=Category)
+@Limiter.limit("10/hour")
 async def read_category(
         category_id: int,
         category_service: CategoryService = Depends(get_category_service)
@@ -43,3 +48,7 @@ async def read_category(
     if db_category is None:
         raise HTTPException(status_code=404, detail="Category not found")
     return db_category
+
+@router.get("/unlimited")
+async def unlimited_page(request: Request):
+    return {"message": "This page is unlimited!"}
